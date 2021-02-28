@@ -5,7 +5,7 @@ const QueueInput = (): JSX.Element => {
   let inputRef: HTMLInputElement;
 
   const getInfo = () => {
-    fetch(`http://15.188.62.235:8080/info`, {
+    fetch(`http://ec2-15-188-62-235.eu-west-3.compute.amazonaws.com:8080/info`, {
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
