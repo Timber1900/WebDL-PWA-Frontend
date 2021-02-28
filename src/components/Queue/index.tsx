@@ -38,7 +38,7 @@ const Queue = () => {
     for(const curItem of items){
       // eslint-disable-next-line no-loop-func
       await new Promise((res, rej) => {
-        fetch(`http://ec2-15-188-62-235.eu-west-3.compute.amazonaws.com:8080/video`, {
+        fetch(`http://15.188.62.235:8080/video`, {
           method: 'POST',
           mode: 'cors',
           cache: 'no-cache',
