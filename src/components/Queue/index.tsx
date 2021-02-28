@@ -38,7 +38,7 @@ const Queue = () => {
     for(const curItem of items){
       // eslint-disable-next-line no-loop-func
       await new Promise((res, rej) => {
-        fetch(`http://ec2-15-188-62-235.eu-west-3.compute.amazonaws.com:8080/video`, {
+        fetch(`https://api.web-dl.live/video`, {
           method: 'POST',
           mode: 'cors',
           cache: 'no-cache',
@@ -48,6 +48,7 @@ const Queue = () => {
           body: JSON.stringify({format: curItem.Formats, url: curItem.Info.videoDetails.video_url, info: curItem.Info})
         })
         .then(res => {
+          console.log(res)
           if(res.body){
             const fileStream = streamSaver.createWriteStream(`${curItem.Title}.mkv`, {
               size: parseInt(curItem.Info.formats[1].contentLength),
