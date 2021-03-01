@@ -8,8 +8,8 @@ export let setCurQueue: React.Dispatch<React.SetStateAction<item[]>>;
 export interface item {
   Thumbnail: string,
   Title: string,
-  Info: ytdl.videoInfo,
-  Formats: Array<ytdl.videoFormat>
+  Info: any,
+  Format: any
 }
 
 const Item = (props: item) => {
@@ -38,6 +38,7 @@ const Queue = () => {
     for(const curItem of items){
       // eslint-disable-next-line no-loop-func
       await new Promise((res, rej) => {
+        // fetch(`http://localhost:8080/video`, {
         fetch(`https://api.web-dl.live/video`, {
           method: 'POST',
           mode: 'cors',
@@ -45,13 +46,13 @@ const Queue = () => {
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({format: curItem.Formats, url: curItem.Info.videoDetails.video_url, info: curItem.Info})
+          body: JSON.stringify({ url: curItem.Info.webpage_url, info: curItem.Info })
         })
         .then(res => {
-          console.log(res)
+          console.log(curItem)
           if(res.body){
             const fileStream = streamSaver.createWriteStream(`${curItem.Title}.mkv`, {
-              size: parseInt(curItem.Info.formats[1].contentLength),
+              size: parseInt(curItem.Format.filesize),
               writableStrategy: undefined,
               readableStrategy: undefined
             })
@@ -75,7 +76,7 @@ const Queue = () => {
   <Container>
     <QueueDiv>
       {items.map((val, i) => {
-        return <Item Thumbnail={val.Thumbnail} Title={val.Title} Info={val.Info} Formats={val.Formats} key={i}/>
+        return <Item Thumbnail={val.Thumbnail} Title={val.Title} Info={val.Info} Format={val.Format} key={i}/>
       })}
     </QueueDiv>
     <QueueButtonsDiv>

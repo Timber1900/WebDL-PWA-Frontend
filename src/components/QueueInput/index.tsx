@@ -1,10 +1,12 @@
 import React from 'react'
 import {Input, Submit, Container} from './style'
-import {curQueue, setCurQueue, item} from '../Queue'
+
+import {curQueue, item, setCurQueue} from '../Queue'
 const QueueInput = (): JSX.Element => {
   let inputRef: HTMLInputElement;
 
   const getInfo = () => {
+    // fetch(`http://localhost:8080/info`, {
     fetch(`https://api.web-dl.live/info`, {
       method: 'POST',
       mode: 'cors',
@@ -12,23 +14,31 @@ const QueueInput = (): JSX.Element => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({url: inputRef.value})
+      body: JSON.stringify({ url: inputRef.value })
     })
     .then(res => res.json())
     .then(res => {
       const newQueue = [...curQueue]
+      const parsedData = res;
+      for(const item of parsedData){
+        const { info } = item;
+        let bestFormat = {quality: -1};
 
-      for(const item of res){
-        const info: ytdl.videoInfo = item.info;
+        for(const format of info.formats) {
+          if(format.quality > bestFormat.quality){
+            bestFormat = format;
+          }
+        }
+
+        console.log(info)
         const newItem: item = {
           Info: info,
-          Thumbnail: info.videoDetails.thumbnails[0].url,
-          Title: info.videoDetails.title,
-          Formats: item.formats
+          Thumbnail: info.thumbnail,
+          Title: info.title,
+          Format: bestFormat
         };
         newQueue.push(newItem)
       }
-
       setCurQueue(newQueue);
     })
   }
