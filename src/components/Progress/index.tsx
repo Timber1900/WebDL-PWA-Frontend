@@ -1,8 +1,9 @@
-import React from 'react'
-import {Input, Submit, Container} from './style'
-
+import React, { useRef } from 'react';
+import { Outer, Input, Submit } from './style';
 import {curQueue, item, setCurQueue} from '../Queue'
-const QueueInput = (): JSX.Element => {
+
+
+const Progress = () => {
   let inputRef: HTMLInputElement;
 
   const getInfo = () => {
@@ -43,12 +44,12 @@ const QueueInput = (): JSX.Element => {
     })
   }
 
-  return(
-  <Container>
-    <Input type='text' ref={ref => {if(ref) inputRef = ref}}/>
-    <Submit onClick={getInfo}>Add to queue</Submit>
-  </Container>)
-}
+  return (
+    <Outer>
+      <Input type='text' ref={ref => {if(ref) inputRef = ref}}/>
+      <Submit onClick={getInfo}>Add to queue</Submit>
+    </Outer>
+  );
+};
 
-
-export default QueueInput
+export default Progress;

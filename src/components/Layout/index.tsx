@@ -1,17 +1,18 @@
-import React from 'react'
-import {Container} from './style'
-import QueueInput from '../QueueInput'
-import Queue from '../Queue'
-
+import React from 'react';
+import Progress from '../Progress';
+import Queue from '../Queue';
+import InfoLabel from '../InfoLabel';
+// import Search from '../Search/index';
 
 const Layout = () => {
-
-  return(
-    <Container>
-      <QueueInput />
+  return (
+    <>
+      <Progress />
       <Queue />
-    </Container>
-  )
-}
+      <InfoLabel />
+      {/* <Search /> */}
+    </>
+  );
+};
 
 export default Layout;
