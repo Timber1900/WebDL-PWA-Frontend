@@ -1,5 +1,5 @@
 import React from 'react';
-import Progress from '../Progress';
+import Progress from '../Input';
 import Queue from '../Queue';
 import InfoLabel from '../InfoLabel';
 // import Search from '../Search/index';
