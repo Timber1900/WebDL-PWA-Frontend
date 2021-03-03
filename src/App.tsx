@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
 import Layout from './components/Layout'
 import GlobalStyles from './styles/global';
-import {curQueue, setCurQueue, item} from './components/Queue';
+import {setCurQueue, item} from './components/Queue';
 
 
 function App() {
   useEffect(() => {
     const url = new URL(window.location.href).searchParams.get('text');
+    const storage = window.localStorage;
+    const newQueue: Array<item> = JSON.parse(storage.getItem('queue') || "[]");
     if(url) {
       // fetch(`http://localhost:8080/info`, {
       fetch(`https://api.web-dl.live/info`, {
@@ -20,7 +22,6 @@ function App() {
       })
       .then(res => res.json())
       .then(res => {
-        const newQueue = [...curQueue]
         const parsedData = res;
         for(const item of parsedData){
           const { info } = item;
@@ -41,9 +42,9 @@ function App() {
           };
           newQueue.push(newItem)
         }
-        setCurQueue(newQueue);
       })
     }
+    setCurQueue(newQueue);
   }, [])
 
   return (

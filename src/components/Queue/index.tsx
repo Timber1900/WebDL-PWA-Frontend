@@ -30,7 +30,11 @@ const Queue: FC = () => {
   }, [items])
 
   useEffect(() => {
-    setCurQueue = setItems;
+    setCurQueue = (val) => {
+      const storage = window.localStorage;
+      storage.setItem('queue', JSON.stringify(val))
+      setItems(val)
+    };
   }, [])
 
   const download = async () => {
@@ -72,64 +76,6 @@ const Queue: FC = () => {
     }
   }
 
-  // const downloadQueue = () => {
-  //   updateQueue(outQueue);
-
-  //   let skipped = 0;
-  //   const callback = () => {
-  //     const removedQueue = [...outQueue];
-  //     removedQueue.splice(skipped, 1);
-  //     setQueue(removedQueue);
-  //     let tryAgain = true;
-  //     while (tryAgain) {
-  //       if (removedQueue.length > skipped) {
-  //         const vid = removedQueue[skipped];
-  //         if (vid.download) tryAgain = false;
-  //         if (tryAgain) skipped++;
-  //       } else {
-  //         tryAgain = false;
-  //       }
-  //     }
-
-  //     if (removedQueue.length > skipped) {
-  //       const vid = removedQueue[skipped];
-  //       const format = vid.quality.get(vid.curQual);
-  //       if (Math.sign(parseInt(vid.ext)) === -1) {
-  //         let ext: string = vid.ext === '-3' ? 'mkv' : vid.ext === '-2' ? 'mp4' : 'webm';
-  //         downloadVideo(vid.id, callback, vid.title, vid.merge, format, ext, vid.clips, vid.duration);
-  //       } else {
-  //         let ext: string = vid.ext === '1' ? 'mp3' : 'm4a';
-  //         downloadAudio(vid.id, callback, vid.title, ext, vid.clips, vid.duration);
-  //       }
-  //     } else {
-  //       setDisable(false);
-  //     }
-  //   };
-
-  //   let tryAgain = true;
-  //   while (tryAgain) {
-  //     if (outQueue.length > skipped) {
-  //       const vid = outQueue[skipped];
-  //       if (vid.download) tryAgain = false;
-  //       if (tryAgain) skipped++;
-  //     } else {
-  //       tryAgain = false;
-  //     }
-  //   }
-  //   if (outQueue.length > skipped) {
-  //     const vid = outQueue[skipped];
-  //     const format = vid.quality.get(vid.curQual);
-  //     setDisable(true);
-  //     if (Math.sign(parseInt(vid.ext)) === -1) {
-  //       let ext: string = vid.ext === '-3' ? 'mkv' : vid.ext === '-2' ? 'mp4' : 'webm';
-  //       downloadVideo(vid.id, callback, vid.title, vid.merge, format, ext, vid.clips, vid.duration);
-  //     } else {
-  //       let ext: string = vid.ext === '1' ? 'mp3' : 'm4a';
-  //       downloadAudio(vid.id, callback, vid.title, ext, vid.clips, vid.duration);
-  //     }
-  //   }
-  // };
-
   // const search = () => {
   //   changeSearch(!searchIsUp);
   // };
@@ -150,6 +96,9 @@ const Queue: FC = () => {
       <ButtonsContainer>
         <button onClick={download} /*disabled={disable}*/>
           Download Videos
+        </button>
+        <button onClick={() => {setCurQueue([])}}>
+          Clear Queue
         </button>
         <NavDiv>
           <NavSpan>

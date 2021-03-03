@@ -40,9 +40,9 @@ const renameVideo = function (e: any) {
 const Item: FC<item> = (props: item) => {
   // const { id, merge, /*clips,*/ i, duration } = props;
   const titleLabel = useRef(null);
-  const [title, setTitle] = useState(props.Title);
+  const [, setTitle] = useState(props.Title);
   // const [qual, setQual] = useState<string>(props.quality.entries().next().value[0]);
-  const [show, setShow] = useState(true);
+  const [show, ] = useState(true);
   const [ext, setExt] = useState('mkv');
   // const refs: any = [titleLabel];
 
