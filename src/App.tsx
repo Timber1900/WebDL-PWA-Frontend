@@ -43,6 +43,9 @@ function App() {
           newQueue.push(newItem)
         }
       })
+      .finally(() => {
+        setCurQueue(newQueue);
+      })
     }
     setCurQueue(newQueue);
   }, [])
