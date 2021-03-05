@@ -60,11 +60,12 @@ export const ButtonsContainer = styled.div`
 
   @media only screen and (max-width: 660px) {
     width: 88vw;
-    height: 14vh;
+    height: fit-content;
   }
 
   > button {
     height: 8vh;
+    min-height: 40px;
 
     &:disabled {
       background-color: var(--almost-black);
