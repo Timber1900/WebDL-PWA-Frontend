@@ -2,7 +2,6 @@ import React from 'react';
 import { Outer, Input, Submit } from './style';
 import {curQueue, item, setCurQueue} from '../Queue'
 
-
 const Progress = () => {
   let inputRef: HTMLInputElement;
 
@@ -21,8 +20,7 @@ const Progress = () => {
     .then(res => {
       const newQueue = [...curQueue]
       const parsedData = res;
-      for(const item of parsedData){
-        const { info } = item;
+      for(const info of parsedData){
         let bestFormat = {quality: -1};
 
         for(const format of info.formats) {
