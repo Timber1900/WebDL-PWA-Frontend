@@ -1,45 +1,34 @@
 import React from 'react';
 import { Outer, Input, Submit } from './style';
 import {curQueue, item, setCurQueue} from '../Queue'
+import axios from 'axios';
+import { INFO_URL } from '../../Constants';
 
 const Progress = () => {
   let inputRef: HTMLInputElement;
 
-  const getInfo = () => {
-    // fetch(`http://localhost:8080/info`, {
-    fetch(`https://api.web-dl.live/info`, {
-      method: 'POST',
-      mode: 'cors',
-      cache: 'no-cache',
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ url: inputRef.value })
-    })
-    .then(res => res.json())
-    .then(res => {
-      const newQueue = [...curQueue]
-      const parsedData = res;
-      for(const info of parsedData){
-        let bestFormat = {quality: -1};
-
-        for(const format of info.formats) {
-          if(format.quality > bestFormat.quality){
-            bestFormat = format;
-          }
+  const getInfo = async () => {
+    const infoResponse = await axios.post(INFO_URL, { url: inputRef.value }, {onDownloadProgress: prg => {console.log(`%c ${prg.loaded} bits of data loaded`, 'color: #4488FF')}, responseType: 'json'})
+    console.log(infoResponse)
+    const newQueue = [...curQueue]
+    const parsedData = infoResponse.data;
+    for(const info of parsedData){
+      let bestFormat = {quality: -1};
+      for(const format of info.formats) {
+        if(format.quality > bestFormat.quality){
+          bestFormat = format;
         }
-
-        console.log(info)
-        const newItem: item = {
-          Info: info,
-          Thumbnail: info.thumbnail,
-          Title: info.title,
-          Format: bestFormat
-        };
-        newQueue.push(newItem)
       }
-      setCurQueue(newQueue);
-    })
+      console.log(info)
+      const newItem: item = {
+        Info: info,
+        Thumbnail: info.thumbnail,
+        Title: info.title,
+        Format: bestFormat
+      };
+      newQueue.push(newItem)
+    }
+    setCurQueue(newQueue);
   }
 
   return (

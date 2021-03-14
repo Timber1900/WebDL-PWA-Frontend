@@ -3,6 +3,9 @@ import { Outer, QueueContainer, ButtonsContainer, NavSpan, NavLabel, NavDiv } fr
 import Item from './Item';
 import streamSaver from 'streamsaver'
 // import { changeSearch, searchIsUp } from '../Search/index';
+import axios from 'axios';
+import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
+import { AUDIO_URL, VIDEO_URL } from '../../Constants';
 
 export let curQueue: Array<item>;
 export let setCurQueue: React.Dispatch<React.SetStateAction<item[]>>;
@@ -39,43 +42,64 @@ const Queue: FC = () => {
 
   const download = async () => {
     let curItems = [...items];
-    for(const curItem of items){
-      // eslint-disable-next-line no-loop-func
-      await new Promise((res, rej) => {
-        // fetch(`http://localhost:8080/video`, {
-        fetch(`https://api.web-dl.live/video`, {
-          method: 'POST',
-          mode: 'cors',
-          cache: 'no-cache',
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ url: curItem.Info.webpage_url, info: curItem.Info })
-        })
-        .then(res => {
-          console.log(curItem)
-          if(res.body){
-            const fileStream = streamSaver.createWriteStream(`${curItem.Title}.mkv`, {
-              size: parseInt(curItem.Format.filesize),
-              writableStrategy: undefined,
-              readableStrategy: undefined
-            })
-            res.body.pipeTo(fileStream)
-            .then(console.log, console.error)
-          }
+    for(let i = 0; i < items.length; i++){
+      const func = function (this: item[], res: (value: unknown) => void, rej: (reason?: any) => void) {
+        const curItem = items[i]
+        const dataArray = [];
+
+        dataArray.push(axios.post<Blob>(VIDEO_URL, {url: curItem.Info.webpage_url}, {onDownloadProgress: prg => {console.log(`%c ${prg.loaded} bits of data loaded`, 'color: #4488FF')}, responseType: "blob"}))
+        dataArray.push(axios.post<Blob>(AUDIO_URL, {url: curItem.Info.webpage_url}, {onDownloadProgress: prg => {console.log(`%c ${prg.loaded} bits of data loaded`, 'color: #4488FF')}, responseType: "blob"}))
+
+        Promise.all(dataArray)
+        .then(async (res) => {
+          const [audioData, videoData] = res.sort((a, b) => a.data.size - b.data.size);
+          const ffmpeg = createFFmpeg({ progress: console.log });
+          await ffmpeg.load();
+          ffmpeg.FS('writeFile', 'audio.m4a', await fetchFile(audioData.data));
+          ffmpeg.FS('writeFile', 'video.mkv', await fetchFile(videoData.data));
+          await ffmpeg.run('-i', 'audio.m4a', '-i', 'video.mkv','-map', '0:a','-map', '1:v', '-c:v', 'copy', 'out.mkv');
+          const out = ffmpeg.FS('readFile', 'out.mkv');
+          const fileStream = streamSaver.createWriteStream(`${curItem.Title}.mkv`, {
+            size: audioData.data.size + videoData.data.size,
+            writableStrategy: undefined,
+            readableStrategy: undefined
+          })
+          const writer = fileStream.getWriter();
+          writer.write(out);
+          writer.close();
         })
         .catch(rej)
         .finally(() => {
-          curItems = curItems.filter((val, i) => val !== curItem)
-          setItems(curItems);
+          setItems(this.filter((val: any, i: any) => val !== curItem));
           res("Done")
         });
-      })
-      .then(console.log)
-      .catch(console.error)
+      }
+      await new Promise(func.bind(curItems))
+      }
+
+  }
+  const downloadAudio = async () => {
+    let curItems = [...items];
+    for(const curItem of items){
+      const down = async function (this: item[], res: (value: unknown) => void, rej: (reason?: any) => void) {
+        const audioBlob = await axios.post<Blob>(AUDIO_URL, {url: curItem.Info.webpage_url}, {onDownloadProgress: prg => {console.log(`%c ${prg.loaded} bits of data loaded`, 'color: #4488FF')}, responseType: "blob"})
+        const buffer = await audioBlob.data.arrayBuffer();
+        const view = new Uint8Array(buffer);
+
+        const fileStream = streamSaver.createWriteStream(`${curItem.Title}.m4a`, {
+          size: audioBlob.data.size,
+          writableStrategy: undefined,
+          readableStrategy: undefined
+        })
+        const writer = fileStream.getWriter();
+        writer.write(view);
+        writer.close();
+        setItems(this.filter((val: any, i: any) => val !== curItem));
+        res("Done")
+      }
+      await new Promise(down.bind(curItems));
     }
   }
-
   // const search = () => {
   //   changeSearch(!searchIsUp);
   // };
@@ -95,7 +119,10 @@ const Queue: FC = () => {
       </QueueContainer>
       <ButtonsContainer>
         <button onClick={download} /*disabled={disable}*/>
-          Download Videos
+          Download Video
+        </button>
+        <button onClick={downloadAudio} /*disabled={disable}*/>
+          Download Audio
         </button>
         <button onClick={() => {setCurQueue([])}}>
           Clear Queue
